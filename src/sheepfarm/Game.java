@@ -48,8 +48,8 @@ public class Game extends JPanel  implements Runnable, KeyListener {
         for (int i = 0; i < 20; i++) {
             double x = Math.random() * WIDTH;
             double y = Math.random() * HEIGHT;
-            Grass grass = new Grass(x, y, 20, resources.grassSprite);
-            objects.add(grass);
+            objects.add(new Grass(x, y, 20, resources.grassSprite));
+
         }
     }
 
