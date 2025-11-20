@@ -14,6 +14,8 @@ public class ResourceLoader {
     public BufferedImage fenceSprite;
     public BufferedImage barnSprite;
     public BufferedImage playerSheet;
+    public BufferedImage zenaRight;
+    public BufferedImage zenaLeft;
 
     public ResourceLoader() {
         sheepRightSprite = load("sheep_right.png");
@@ -23,6 +25,8 @@ public class ResourceLoader {
         fenceSprite      = load("fence.png");
         barnSprite       = load("barn.png");
         playerSheet      = load("player_spritesheet.png");
+        zenaRight        = load("zena_right.png");
+        zenaLeft         = load("zena_left.png");
     }
 
     private BufferedImage load(String filename) {

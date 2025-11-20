@@ -7,6 +7,8 @@ public class Sheep extends Animal {
 
     private int woolAmount = 3;
     private boolean isSheared = false;
+    
+    
 
     // Flee / frightened timers
     private boolean isFleeing = false;

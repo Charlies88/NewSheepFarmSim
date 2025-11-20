@@ -19,7 +19,7 @@ public class Main {
         // Layout so game + info panel sit side by side
         frame.setLayout(new BorderLayout());
         frame.add(game, BorderLayout.CENTER);
-        frame.add(game.getInfoPanel(), BorderLayout.EAST);
+
         
         
         frame.pack();

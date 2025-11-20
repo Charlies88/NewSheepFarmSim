@@ -1,35 +1,25 @@
 package sheepfarm;
 
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseMotionListener;
-
 import javax.swing.*;
 import java.awt.*;
-
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Game extends JPanel  implements Runnable, KeyListener, MouseListener, MouseMotionListener  {
+public class Game extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 
     public static final int WIDTH = 800;
     public static final int HEIGHT = 600;
 
     public List<GameObject> objects = new ArrayList<>();
-
     public ResourceLoader resources;
     public Player player;
 
     private Thread gameThread;
     private boolean running = false;
-    
-    private GameObject selectedObject = null; // currently selected object
-    private JPanel infoPanel;
-    private JTextArea infoArea;
 
-    
+    private GameObject selectedObject = null; // currently selected object
+    private JTextArea infoArea;
 
     public Game() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -38,35 +28,29 @@ public class Game extends JPanel  implements Runnable, KeyListener, MouseListene
         resources = new ResourceLoader();
         initObjects();
 
-        // Register this panel to receive key events
+        // Input listeners
         setFocusable(true);
         requestFocusInWindow();
         addKeyListener(this);
-        addMouseListener((MouseListener) this);
-        
-        
-        // Setup info panel
-        infoPanel = new JPanel();
-        infoPanel.setPreferredSize(new Dimension(200, HEIGHT));
-        infoPanel.setBackground(Color.LIGHT_GRAY);
-        infoArea = new JTextArea();
-        infoArea.setEditable(false);
-        infoPanel.setLayout(new BorderLayout());
-        infoPanel.add(new JScrollPane(infoArea), BorderLayout.CENTER);
+        addMouseListener(this);
+        addMouseMotionListener(this);
 
+        // Info panel setup
+        infoArea = new JTextArea(15, 20);
+        infoArea.setEditable(false);
+        infoArea.setBackground(Color.LIGHT_GRAY);
+        infoArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
     }
 
+    public JScrollPane getInfoPanel() {
+        return new JScrollPane(infoArea);
+    }
 
-    public JPanel getInfoPanel() {
-        return infoPanel;
-        }
-
-    
-    
     private void initObjects() {
         // Spawn player at center
         player = new Player(WIDTH / 2.0, HEIGHT / 2.0, 32, resources.playerSheet);
         objects.add(player);
+        
 
         // Spawn a sheep
         Sheep sheep = new Sheep(100, 100, 32, resources.sheepRightSprite);
@@ -77,7 +61,6 @@ public class Game extends JPanel  implements Runnable, KeyListener, MouseListene
             double x = Math.random() * WIDTH;
             double y = Math.random() * HEIGHT;
             objects.add(new Grass(x, y, 20, resources.grassSprite));
-
         }
     }
 
@@ -111,20 +94,18 @@ public class Game extends JPanel  implements Runnable, KeyListener, MouseListene
         for (GameObject obj : objects) obj.update(this);
         updateInfoPanel();
     }
-    
-    
 
     private void updateInfoPanel() {
         if (selectedObject != null) {
             StringBuilder sb = new StringBuilder();
             sb.append("Class: ").append(selectedObject.getClass().getSimpleName()).append("\n");
-            sb.append("Position: ").append(selectedObject.pos.x).append(", ").append(selectedObject.pos.y).append("\n");
+            sb.append("Position: ").append(String.format("%.1f, %.1f", selectedObject.pos.x, selectedObject.pos.y)).append("\n");
             sb.append("Size: ").append(selectedObject.size).append("\n");
             if (selectedObject instanceof Animal) {
-                sb.append("Health: ").append(((Animal)selectedObject).health).append("\n");
+                sb.append("Health: ").append(((Animal) selectedObject).health).append("\n");
             }
             if (selectedObject instanceof Plant) {
-                sb.append("Growth: ").append(((Plant)selectedObject).getGrowth()).append("\n");
+                sb.append("Growth: ").append(((Plant) selectedObject).getGrowth()).append("\n");
             }
             infoArea.setText(sb.toString());
         } else {
@@ -132,53 +113,31 @@ public class Game extends JPanel  implements Runnable, KeyListener, MouseListene
         }
     }
 
-
     @Override
-    public void paintComponent(Graphics g0) {
+    protected void paintComponent(Graphics g0) {
         super.paintComponent(g0);
         Graphics2D g = (Graphics2D) g0.create();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        for (GameObject obj : objects) obj.render(g);
-
-        g.dispose();
-        
-        if (selectedObject != null) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setColor(Color.WHITE);
-            g2.fillRect(10, 10, 200, 120); // info panel background
-
-            g2.setColor(Color.BLACK);
-            g2.drawString("Type: " + selectedObject.getClass().getSimpleName(), 20, 30);
-            g2.drawString("Position: " + selectedObject.pos.x + ", " + selectedObject.pos.y, 20, 50);
-            
-            if (selectedObject instanceof Animal) {
-                Animal a = (Animal) selectedObject;
-                g2.drawString("Health: " + a.health, 20, 70);
-                g2.drawString("Alive: " + a.isAlive, 20, 90);
-            }
-            
-            if (selectedObject instanceof Plant) {
-                Plant p = (Plant) selectedObject;
-                g2.drawString("Growth: " + p.getGrowth(), 20, 110);
-            }
-            
-            g2.dispose();
+        for (GameObject obj : objects) {
+            obj.render(g);
         }
 
-    }
+        // Highlight selected object
+        if (selectedObject != null) {
+            g.setColor(new Color(255, 255, 0, 128)); // semi-transparent yellow
+            int radius = selectedObject.size;
+            g.fillOval((int)(selectedObject.pos.x - radius), (int)(selectedObject.pos.y - radius),
+                       radius * 2, radius * 2);
+        }
 
+        g.dispose();
+    }
 
     // ---------------- KeyListener ----------------
-    @Override
-    public void keyTyped(KeyEvent e) {}
-    @Override
-    public void keyPressed(KeyEvent e) {
-        player.keyPressed(e);
-    }
-    @Override
-    public void keyReleased(KeyEvent e) {
-        player.keyReleased(e);
-    }
+    @Override public void keyTyped(KeyEvent e) {}
+    @Override public void keyPressed(KeyEvent e) { player.keyPressed(e); }
+    @Override public void keyReleased(KeyEvent e) { player.keyReleased(e); }
 
     // ---------------- MouseListener ----------------
     @Override
@@ -199,14 +158,9 @@ public class Game extends JPanel  implements Runnable, KeyListener, MouseListene
     @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
-    
+
     // ---------------- MouseMotionListener ----------------
-    @Override
-    public void mouseDragged(MouseEvent e) {}
-    @Override
-    public void mouseMoved(MouseEvent e) {}
-
-
-    
+    @Override public void mouseDragged(MouseEvent e) {}
+    @Override public void mouseMoved(MouseEvent e) {}
 
 }
