@@ -61,5 +61,38 @@ public abstract class GameObject {
 		}
 
     
+	 
+	 public String getInfo() {
+		    StringBuilder sb = new StringBuilder();
+		    sb.append("Class: ").append(getClass().getSimpleName()).append("\n");
+		    sb.append("Position: ").append(String.format("%.1f, %.1f", pos.x, pos.y)).append("\n");
+		    sb.append("Size: ").append(size).append("\n");
+
+		    // Health (if present)
+		    if (this instanceof Animal) {
+		        Animal a = (Animal)this;
+		        sb.append("Health: ").append(a.health).append("/").append(a.maxHealth).append("\n");
+		        sb.append("Hunger: ").append(String.format("%.1f", a.hunger)).append("/").append(a.hungerThreshold).append("\n");
+		    }
+
+		    // Growth (for plants)
+		    if (this instanceof Plant) {
+		        Plant p = (Plant)this;
+		        sb.append("Growth: ").append(String.format("%.1f", p.getGrowth())).append("\n");
+		        if (p.foodComponent != null) {
+		            sb.append("Food available: ").append(!p.foodComponent.isConsumed()).append("\n");
+		        }
+		    }
+
+		    // Any other info (food components, etc.)
+		    if (foodComponent != null) {
+		        sb.append("Food value: ").append(foodComponent.getFoodValue()).append("\n");
+		    }
+
+		    return sb.toString();
+		}
+
+	 
+	 
     public abstract void render(Graphics2D g);
 }

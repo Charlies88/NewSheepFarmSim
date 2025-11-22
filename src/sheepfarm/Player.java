@@ -53,13 +53,9 @@ public class Player extends Animal {
         // Select animation frame based on direction
         currentFrame = getFrameFromDirection(dx, dy);
         
-        for (GameObject obj : g.objects) {
-            if (obj.foodComponent != null && !obj.foodComponent.isConsumed() 
-                && this.distanceTo(obj) < size + obj.size) {
-                int foodValue = obj.foodComponent.consume(); // returns int
-                this.eat(foodValue);                          // pass int
-            }
-        }
+     
+        // Eat any nearby food
+        checkForFood(g);
 
         
     }

@@ -8,6 +8,11 @@ import java.util.Map;
 public abstract class Animal extends GameObject {
 
 
+	protected double hunger = 0;         // increments each tick
+	protected double hungerRate = 1;     // amount hunger increases per tick
+	protected double hungerThreshold = 100; // when health starts declining
+	
+	
     public boolean isAlive = true;
     protected Vector vel = new Vector();
 
@@ -36,13 +41,22 @@ public abstract class Animal extends GameObject {
             frameTick = 0;
         }
     }
+    
+
+    
 
     @Override
     public void update(Game g) {
         super.update(g);
 
-        if (!isAlive) playAnimation("dead");
+        if (!isAlive) {
+            playAnimation("dead");
+            return;
+        }
 
+        // Hunger increases
+        hunger += hungerRate;
+        if (hunger > hungerThreshold) takeDamage(1); // health decays if starving
         pos.add(vel);
 
         // Animate
@@ -62,10 +76,30 @@ public abstract class Animal extends GameObject {
         think(g);
     }
 
-    public void eat(int foodValue) {
-        health += foodValue;
-        if (health > maxHealth) health = maxHealth;
-        System.out.println(getClass().getSimpleName() + " ate " + foodValue + " and now has " + health + " health.");
+
+
+    protected void eat(int foodValue) {
+        health = Math.min(health + foodValue, maxHealth);
+        hunger = Math.max(hunger - foodValue, 0); // eating reduces hunger
+        System.out.println(getClass().getSimpleName() + " ate and now has " + health + " health.");
+    }
+
+
+
+    public void checkForFood(Game g) {
+        if (!isAlive) return;
+
+        for (GameObject obj : g.objects) {
+            if (obj.foodComponent != null && !obj.foodComponent.isConsumed() 
+                && this.distanceTo(obj) < size + obj.size) {
+                
+                // Only eat if health is not full
+                if (health < maxHealth) {
+                    int foodValue = obj.foodComponent.consume(); // returns int
+                    eat(foodValue);
+                }
+            }
+        }
     }
 
 
@@ -86,5 +120,6 @@ public abstract class Animal extends GameObject {
     protected void die() {
         isAlive = false;
         vel = new Vector();
+
     }
 }

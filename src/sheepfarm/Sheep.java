@@ -30,26 +30,19 @@ public class Sheep extends Animal {
     protected void think(Game g) {
         if (!isAlive) return;
 
-        // Seek nearest grass
+
         targetGrass = findNearestGrass(g);
-        if (targetGrass != null) {
-            moveTowards(targetGrass.pos, 0.2);
+        if (targetGrass != null) moveTowards(targetGrass.pos, 0.2);
 
-            for (GameObject obj : g.objects) {
-                if (obj.foodComponent != null && !obj.foodComponent.isConsumed() 
-                    && this.distanceTo(obj) < size + obj.size) {
-                    int foodValue = obj.foodComponent.consume(); // returns int
-                    this.eat(foodValue);                          // pass int
-                }
-            }
+        // Eat any nearby food
+        checkForFood(g);
 
-        }
-
-        // Decide animation based on horizontal movement
+        // Animation
         if (vel.x > 0.1) playAnimation("walk_right");
         else if (vel.x < -0.1) playAnimation("walk_left");
         else playAnimation("idle");
     }
+
 
     private Plant findNearestGrass(Game g) {
         Plant best = null;

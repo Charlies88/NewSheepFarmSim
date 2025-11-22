@@ -18,9 +18,10 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
 
     private Thread gameThread;
     private boolean running = false;
-
+    
+    private GameObject hoveredObject = null;
     private GameObject selectedObject = null; // currently selected object
-    private JTextArea infoArea;
+
 
     public Game() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -36,11 +37,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        // Info panel setup
-        infoArea = new JTextArea(15, 20);
-        infoArea.setEditable(false);
-        infoArea.setBackground(Color.LIGHT_GRAY);
-        infoArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
     }
 
 
@@ -115,26 +112,10 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
 
     private void update() {
         for (GameObject obj : objects) obj.update(this);
-        updateInfoPanel();
+
     }
 
-    private void updateInfoPanel() {
-        if (selectedObject != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Class: ").append(selectedObject.getClass().getSimpleName()).append("\n");
-            sb.append("Position: ").append(String.format("%.1f, %.1f", selectedObject.pos.x, selectedObject.pos.y)).append("\n");
-            sb.append("Size: ").append(selectedObject.size).append("\n");
-            if (selectedObject instanceof Animal) {
-                sb.append("Health: ").append(((Animal) selectedObject).health).append("\n");
-            }
-            if (selectedObject instanceof Plant) {
-                sb.append("Growth: ").append(((Plant) selectedObject).getGrowth()).append("\n");
-            }
-            infoArea.setText(sb.toString());
-        } else {
-            infoArea.setText("");
-        }
-    }
+ 
 
     @Override
     protected void paintComponent(Graphics g0) {
@@ -148,14 +129,41 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
 
         // Highlight selected object
         if (selectedObject != null) {
-            g.setColor(new Color(255, 255, 0, 128)); // semi-transparent yellow
+            g.setColor(new Color(255, 255, 0, 128));
             int radius = selectedObject.size;
             g.fillOval((int)(selectedObject.pos.x - radius), (int)(selectedObject.pos.y - radius),
                        radius * 2, radius * 2);
         }
 
+        // Draw info overlay for hovered or selected object
+        GameObject obj = (hoveredObject != null) ? hoveredObject : selectedObject;
+        if (obj != null) {
+            g.setColor(new Color(0, 0, 0, 200)); // semi-transparent background
+            StringBuilder sb = new StringBuilder();
+            sb.append("Class: ").append(obj.getClass().getSimpleName()).append("\n");
+            sb.append("X: ").append(String.format("%.1f", obj.pos.x)).append(" Y: ").append(String.format("%.1f", obj.pos.y)).append("\n");
+            if (obj instanceof Animal) sb.append("Health: ").append(((Animal)obj).health).append("\n");
+            if (obj instanceof Plant) sb.append("Growth: ").append(((Plant)obj).getGrowth()).append("\n");
+
+            String[] lines = sb.toString().split("\n");
+            int boxWidth = 0;
+            int lineHeight = g.getFontMetrics().getHeight();
+            for (String line : lines) boxWidth = Math.max(boxWidth, g.getFontMetrics().stringWidth(line));
+            int boxHeight = lineHeight * lines.length + 4;
+
+            int drawX = (int)obj.pos.x + obj.size;
+            int drawY = (int)obj.pos.y - obj.size - boxHeight;
+
+            g.fillRect(drawX, drawY, boxWidth + 6, boxHeight);
+            g.setColor(Color.WHITE);
+            for (int i = 0; i < lines.length; i++) {
+                g.drawString(lines[i], drawX + 3, drawY + lineHeight * (i + 1) - 2);
+            }
+        }
+
         g.dispose();
     }
+
 
     // ---------------- KeyListener ----------------
     @Override public void keyTyped(KeyEvent e) {}
@@ -169,14 +177,16 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         for (GameObject obj : objects) {
             double dx = obj.pos.x - e.getX();
             double dy = obj.pos.y - e.getY();
-            double distance = Math.sqrt(dx*dx + dy*dy);
-            if (distance <= obj.size) {
+            if (Math.sqrt(dx*dx + dy*dy) <= obj.size) {
                 selectedObject = obj;
                 break;
             }
         }
-        updateInfoPanel();
+
     }
+
+    
+
     @Override public void mousePressed(MouseEvent e) {}
     @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseEntered(MouseEvent e) {}
@@ -184,6 +194,21 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
 
     // ---------------- MouseMotionListener ----------------
     @Override public void mouseDragged(MouseEvent e) {}
-    @Override public void mouseMoved(MouseEvent e) {}
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        hoveredObject = null;
+        for (GameObject obj : objects) {
+            double dx = obj.pos.x - e.getX();
+            double dy = obj.pos.y - e.getY();
+            double distance = Math.sqrt(dx*dx + dy*dy);
+            if (distance <= obj.size) {
+                hoveredObject = obj;
+                break;
+            }
+        }
+    }
+
+
 
 }
