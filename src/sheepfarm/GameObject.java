@@ -6,12 +6,20 @@ public abstract class GameObject {
     public Vector pos;
     public Vector vel = new Vector();
     public int size;
+    
 	public int health;
+	public int maxHealth;
+	
+    public FoodComponent foodComponent; // optional
 
-    public GameObject(double x, double y, int size) {
+    public GameObject(double x, double y, int size, int maxHealth) {
         this.pos = new Vector(x, y);
         this.size = size;
+        this.maxHealth = maxHealth;
+        this.health = maxHealth;
     }
+    
+
 
     // Called every tick
     public void update(Game g) {

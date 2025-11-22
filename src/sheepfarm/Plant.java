@@ -12,9 +12,13 @@ public abstract class Plant extends GameObject {
     protected double dampening = 0.85;
     protected double pushForce = 0.2;
 
-    public Plant(double x, double y, int size) {
-        super(x, y, size);
+    public Plant(double x, double y, int size, int foodValue) {
+        super(x, y, size, foodValue);
         homePos = pos.copy();
+        // Plants can optionally be eaten
+        if (foodValue > 0) {
+            this.foodComponent = new FoodComponent(foodValue);
+        }
     }
 
     public void push(double dx, double dy) {
@@ -38,6 +42,8 @@ public abstract class Plant extends GameObject {
     protected void grow() {
         growth = Utils.clamp(growth + growthRate, 0, 100);
     }
+    
+
 
     public double getGrowth() { return growth; }
 

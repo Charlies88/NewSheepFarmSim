@@ -14,11 +14,12 @@ public class Player extends Animal {
     private PlayerSprites sprites;
     private BufferedImage currentFrame;
 
-    public Player(double x, double y, int size, PlayerSprites sprites) {
-        super(x, y, size, sprites.down); // default idle frame
+    public Player(double x, double y, int size, PlayerSprites sprites, int maxHealth) {
+        super(x, y, size, sprites.down, maxHealth);
         this.sprites = sprites;
         playAnimation("idle");
     }
+
 
     // Determine which frame to show based on movement direction
     BufferedImage getFrameFromDirection(double dx, double dy) {
@@ -51,6 +52,16 @@ public class Player extends Animal {
 
         // Select animation frame based on direction
         currentFrame = getFrameFromDirection(dx, dy);
+        
+        for (GameObject obj : g.objects) {
+            if (obj.foodComponent != null && !obj.foodComponent.isConsumed() 
+                && this.distanceTo(obj) < size + obj.size) {
+                int foodValue = obj.foodComponent.consume(); // returns int
+                this.eat(foodValue);                          // pass int
+            }
+        }
+
+        
     }
 
     @Override

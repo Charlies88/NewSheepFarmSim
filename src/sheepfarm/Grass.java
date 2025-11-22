@@ -7,7 +7,7 @@ public class Grass extends Plant {
     private BufferedImage sprite;
 
     public Grass(double x, double y, int size, BufferedImage sprite) {
-        super(x, y, size);
+        super(x, y, size, 10); // foodValue of 10
         this.sprite = sprite;
 
         // tweak physics if you want

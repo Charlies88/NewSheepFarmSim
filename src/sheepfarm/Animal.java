@@ -7,24 +7,23 @@ import java.util.Map;
 
 public abstract class Animal extends GameObject {
 
-    public double health = 100;
+
     public boolean isAlive = true;
     protected Vector vel = new Vector();
-    
+
     // Map of animation name -> frames
     protected Map<String, BufferedImage[]> animations = new HashMap<>();
-    protected String currentAnim = "idle"; // default animation
+    protected String currentAnim = "idle"; 
     protected int currentFrame = 0;
     protected int frameTick = 0;
     protected int frameDelay = 6;
 
-    public Animal(double x, double y, int size, BufferedImage defaultSprite) {
-        super(x, y, size);
-        // Store a default single-frame animation to avoid null issues
+    public Animal(double x, double y, int size, BufferedImage defaultSprite, int maxHealth) {
+        super(x, y, size, maxHealth);
         animations.put("idle", new BufferedImage[]{defaultSprite});
     }
 
-    // Set animation frames
+
     public void setAnimation(String name, BufferedImage[] frames) {
         animations.put(name, frames);
     }
@@ -42,16 +41,9 @@ public abstract class Animal extends GameObject {
     public void update(Game g) {
         super.update(g);
 
+        if (!isAlive) playAnimation("dead");
 
-        
-        if (!isAlive) {
-            playAnimation("dead");
-        }
-        
-        // Move animal by velocity
-        pos.x += vel.x;
-        pos.y += vel.y;
-
+        pos.add(vel);
 
         // Animate
         BufferedImage[] frames = animations.getOrDefault(currentAnim, animations.get("idle"));
@@ -69,6 +61,14 @@ public abstract class Animal extends GameObject {
         resolveCollisions(g);
         think(g);
     }
+
+    public void eat(int foodValue) {
+        health += foodValue;
+        if (health > maxHealth) health = maxHealth;
+        System.out.println(getClass().getSimpleName() + " ate " + foodValue + " and now has " + health + " health.");
+    }
+
+
 
     protected void applyFriction(double factor) {
         vel.multiply(factor);

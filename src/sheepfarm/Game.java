@@ -43,27 +43,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         infoArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
     }
 
-//    public JScrollPane getInfoPanel() {
-//        return new JScrollPane(infoArea);
-//    }
-//
-//    private void initObjects() {
-//        // Spawn player at center
-//        player = new Player(WIDTH / 2.0, HEIGHT / 2.0, 32, resources.playerSheet);
-//        objects.add(player);
-//        
-//
-//        // Spawn a sheep
-//        Sheep sheep = new Sheep(100, 100, 32, resources.sheepRightSprite);
-//        objects.add(sheep);
-//
-//        // Spawn grass patches
-//        for (int i = 0; i < 20; i++) {
-//            double x = Math.random() * WIDTH;
-//            double y = Math.random() * HEIGHT;
-//            objects.add(new Grass(x, y, 20, resources.grassSprite));
-//        }
-//    }
+
     
     private void initObjects() {
         // --- Load sprites ---
@@ -77,7 +57,8 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         PlayerLoader loader = new PlayerLoader();
         PlayerSprites playerSprites = loader.load("assets/player_spritesheet.png", "assets/player_spritesheet.json");
         if (playerSprites != null) {
-            player = new Player(WIDTH / 2.0, HEIGHT / 2.0, 64, playerSprites);
+        	player = new Player(WIDTH / 2.0, HEIGHT / 2.0, 64, playerSprites, 100);
+
             objects.add(player);
         } else {
             System.err.println("Failed to load player!");

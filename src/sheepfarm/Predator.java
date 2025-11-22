@@ -3,13 +3,11 @@ package sheepfarm;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-public class Predator extends Animal {
+public abstract class Predator extends Animal {
 
-	public Predator(double x, double y, int size, BufferedImage sprite) {
-		super(x, y, size, sprite);
-		// TODO Auto-generated constructor stub
-	}
-
+	public Predator(double x, double y, int size, BufferedImage defaultSprite, int maxHealth) {
+        super(x, y, size, defaultSprite, maxHealth);
+    }
 	@Override
 	protected void think(Game g) {
 		// TODO Auto-generated method stub
