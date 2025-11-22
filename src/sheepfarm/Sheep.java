@@ -1,57 +1,63 @@
 package sheepfarm;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 public class Sheep extends Animal {
 
-    private int woolAmount = 3;
-    private boolean isSheared = false;
-    
-    
-
-    // Flee / frightened timers
+    private Plant targetGrass = null;
     private boolean isFleeing = false;
     private int fleeTicks = 0;
     private static final int FLEE_DURATION = 80;
 
-    // Grass target
-    private Plant targetGrass = null;
+    public Sheep(double x, double y, int size,
+                 BufferedImage[] walkRight,
+                 BufferedImage[] walkLeft,
+                 BufferedImage[] dead) {
+        super(x, y, size, walkRight[0]);
 
-    public Sheep(double x, double y, int size, BufferedImage sprite) {
-        super(x, y, size, sprite);
+        // Set animations in the parent
+        setAnimation("walk_right", walkRight);
+        setAnimation("walk_left", walkLeft);
+        setAnimation("dead", dead);
+        setAnimation("idle", new BufferedImage[]{walkRight[0]});
+
+        // Start with idle animation by default
+        playAnimation("idle");
     }
 
     @Override
     protected void think(Game g) {
         if (!isAlive) return;
 
-        // 2️⃣ Seek grass if hungry
-        if (!isFleeing) {
-            targetGrass = findNearestGrass(g);
-            if (targetGrass != null) {
-                moveTowards(targetGrass.pos, 0.2);
-            } 
-        }
-
-        // 3️⃣ Countdown fleeing
+        // Flee logic
         if (isFleeing) {
             fleeTicks--;
             if (fleeTicks <= 0) isFleeing = false;
+            return;
         }
-    }
 
+        // Seek nearest grass if not fleeing
+        targetGrass = findNearestGrass(g);
+        if (targetGrass != null) {
+            moveTowards(targetGrass.pos, 0.2);
+        }
+
+        // Decide animation based on movement direction
+        if (vel.x > 0.1) playAnimation("walk_right");
+        else if (vel.x < -0.1) playAnimation("walk_left");
+        else playAnimation("idle");
+    }
 
     private Plant findNearestGrass(Game g) {
         Plant best = null;
         double bestDist = Double.MAX_VALUE;
         for (GameObject obj : g.objects) {
             if (!(obj instanceof Grass)) continue;
-            Grass grass = (Grass)obj;
-            double d = distanceTo(grass);
+            double d = distanceTo(obj);
             if (d < bestDist) {
                 bestDist = d;
-                best = grass;
+                best = (Plant)obj;
             }
         }
         return best;
@@ -64,12 +70,6 @@ public class Sheep extends Animal {
 
     @Override
     public void render(Graphics2D g) {
-        if (sprite != null) {
-            g.drawImage(sprite, (int)(pos.x - size), (int)(pos.y - size), size*2, size*2, null);
-        } else {
-            g.setColor(isAlive ? Color.WHITE : Color.GRAY);
-            g.fillOval((int)(pos.x - size), (int)(pos.y - size), size*2, size*2);
-        }
+        super.render(g); // animation is handled in parent
     }
-
 }
