@@ -91,16 +91,19 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             }
         }
         
+        
         BufferedImage[] treeSprites = resources.get("tree");
         if (treeSprites != null && treeSprites.length >= 4) {
             BufferedImage[] stages = new BufferedImage[4];
             System.arraycopy(treeSprites, 0, stages, 0, 4);
 
+            int treeFood = 50; // example base food value for trees
+
             for (int i = 0; i < 5; i++) {
                 double x = Math.random() * Game.WIDTH;
                 double y = Math.random() * Game.HEIGHT;
-                objects.add(new Tree(x, y, 32, stages));
-
+                Tree t = new Tree(x, y, 32, stages, treeFood);
+                objects.add(t);
             }
         }
 

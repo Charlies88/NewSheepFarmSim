@@ -7,7 +7,7 @@ public abstract class Plant extends GameObject {
     protected Vector homePos;
     protected double growth = 0;
     private double maxGrowth = 100;    // fully grown size
-    protected double growthRate = 0.001;
+    protected double growthRate = 0.005; // growth per update tick
 
     // physics
     protected double springStrength = 0.01;

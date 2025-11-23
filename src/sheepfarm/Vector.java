@@ -53,4 +53,10 @@ public class Vector {
     public static double distance(Vector a, Vector b) {
         return Math.hypot(a.x - b.x, a.y - b.y);
     }
+    
+    public void set(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
 }
