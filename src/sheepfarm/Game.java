@@ -120,6 +120,14 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     }
 
 
+    private void renderObjects(Graphics2D g) {
+        // Sort objects by their pos.y (lower y = behind, higher y = in front)
+        objects.sort((a, b) -> Double.compare(a.pos.y, b.pos.y));
+
+        for (GameObject obj : objects) {
+            obj.render(g);
+        }
+    }
 
  
 
@@ -129,9 +137,8 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         Graphics2D g = (Graphics2D) g0.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        for (GameObject obj : objects) {
-            obj.render(g);
-        }
+        // Render all objects in y-order
+        renderObjects(g);
 
         // Highlight selected object
         if (selectedObject != null) {
@@ -160,8 +167,6 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
                 sb.append("Growth: ").append(String.format("%.1f", p.getGrowth())).append("/").append(p.getMaxGrowth()).append("\n");
                 sb.append("Food Value: ").append(p.getFoodValue()).append("\n");
             }
-
-
 
             String[] lines = sb.toString().split("\n");
             int boxWidth = 0;
