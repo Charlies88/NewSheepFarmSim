@@ -7,7 +7,7 @@ public abstract class Plant extends GameObject {
     protected Vector homePos;
     protected double growth = 0;
     private double maxGrowth = 100;    // fully grown size
-    protected double growthRate = 0.05;
+    protected double growthRate = 0.001;
 
     // physics
     protected double springStrength = 0.01;
@@ -91,6 +91,11 @@ public abstract class Plant extends GameObject {
     protected void grow() {
         growth = Utils.clamp(growth + growthRate, 0, 100);
     }
+    
+    public void setGrowth(double value) {
+        this.growth = Math.min(value, maxGrowth);
+    }
+
 
     public double getGrowth() { return growth; }
     

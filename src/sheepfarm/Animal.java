@@ -93,12 +93,15 @@ public abstract class Animal extends GameObject {
 
     protected void eat(int foodValue) {
         health = Math.min(health + foodValue, maxHealth);
-        hunger = 0; // fully reset after eating
+        hunger = Math.max(hunger - foodValue*10, 0); // reduce hunger by food value
     }
 
 
+
+ // In Animal
     public void checkForFood(Game g) {
-        if (!isAlive || hunger < hungerThreshold) return; // ← only eat if starving
+        // Only mark plants eaten if colliding, don't alter hunger
+        if (!isAlive) return;
 
         for (GameObject obj : g.objects) {
             if (obj instanceof Plant && obj.foodComponent != null && !((Plant)obj).isEaten()) {
@@ -108,9 +111,7 @@ public abstract class Animal extends GameObject {
                 double distance = Math.sqrt(dx*dx + dy*dy);
 
                 if (distance <= size + plant.getBaseInteractionRadius()) {
-                    plant.eat();
-                    eat(plant.foodComponent.getFoodValue());
-                    return; // stop after first bite
+                    plant.eat(); // mark plant eaten
                 }
             }
         }

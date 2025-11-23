@@ -28,5 +28,7 @@ public class Grass extends Plant {
         eaten = true; 
         if (foodComponent != null) foodComponent.consume(); 
     }
+
+
     
 }

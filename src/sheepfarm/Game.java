@@ -21,6 +21,10 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     
     private GameObject hoveredObject = null;
     private GameObject selectedObject = null; // currently selected object
+    
+    private int grassSpawnCooldown = 0; // ticks until next spawn
+    private int grassSpawnRate = 2000;   // spawn a grass every 300 ticks (~5 seconds at 60FPS)
+
 
 
     public Game() {
@@ -67,17 +71,23 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         BufferedImage[] sheepDead  = resources.get("sheep_dead_right");
 
         if (sheepRight != null && sheepLeft != null && sheepDead != null) {
-            Sheep sheep = new Sheep(100, 100, 32, sheepRight, sheepLeft, sheepDead);
-            objects.add(sheep);
+            for (int i = 0; i < 5; i++) {
+                double x = Math.random() * WIDTH;
+                double y = Math.random() * HEIGHT;
+                Sheep sheep = new Sheep(x, y, 32, sheepRight, sheepLeft, sheepDead);
+                objects.add(sheep);
+            }
         }
 
-        // --- Spawn grass patches ---
+        // --- Spawn grass patches, fully grown ---
         BufferedImage[] grassFrames = resources.get("grass_right");
         if (grassFrames != null && grassFrames.length > 0) {
             for (int i = 0; i < 20; i++) {
                 double x = Math.random() * WIDTH;
                 double y = Math.random() * HEIGHT;
-                objects.add(new Grass(x, y, 20, grassFrames[0]));
+                Grass g = new Grass(x, y, 20, grassFrames[0]);
+                g.setGrowth(g.getMaxGrowth()); // ensure fully grown
+                objects.add(g);
             }
         }
     }
@@ -115,6 +125,15 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             obj.update(this);
         }
 
+     // Random grass spawning
+        if (grassSpawnCooldown <= 0) {
+            spawnRandomGrass();
+            grassSpawnCooldown = grassSpawnRate;
+        } else {
+            grassSpawnCooldown--;
+        }
+
+        
         // safely remove eaten plants
         objects.removeIf(obj -> obj instanceof Plant && ((Plant)obj).isEaten());
     }
@@ -187,6 +206,17 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         g.dispose();
     }
 
+    
+    private void spawnRandomGrass() {
+        BufferedImage[] grassFrames = resources.get("grass_right");
+        if (grassFrames != null && grassFrames.length > 0) {
+            double x = Math.random() * WIDTH;
+            double y = Math.random() * HEIGHT;
+            objects.add(new Grass(x, y, 20, grassFrames[0]));
+        }
+    }
+
+    
 
     // ---------------- KeyListener ----------------
     @Override public void keyTyped(KeyEvent e) {}

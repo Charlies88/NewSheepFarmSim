@@ -32,8 +32,8 @@ public class Sheep extends Animal {
     protected void think(Game g) {
         if (!isAlive) return;
 
-        // Always move around or wander a bit
-        wander(); // implement a simple wandering behavior if needed
+        // Always wander a bit
+        wander();
 
         // Only seek and eat grass if hungry
         if (hunger >= hungerThreshold) {
@@ -42,12 +42,9 @@ public class Sheep extends Animal {
                 moveTowards(targetGrass.pos, 0.2);
 
                 double distance = distanceTo(targetGrass);
-                if (distance <= size + targetGrass.getBaseInteractionRadius()) {
-                    if (!targetGrass.isEaten()) {
-                        targetGrass.eat();
-                        eat(targetGrass.foodComponent.getFoodValue());
-                        hunger = 0; // reset hunger after eating
-                    }
+                if (distance <= size + targetGrass.getBaseInteractionRadius() && !targetGrass.isEaten()) {
+                    eat(targetGrass.foodComponent.getFoodValue()); // feed the sheep
+                    targetGrass.eat(); // mark grass eaten
                 }
             }
         }
