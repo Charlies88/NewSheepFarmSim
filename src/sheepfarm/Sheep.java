@@ -36,7 +36,7 @@ public class Sheep extends Animal {
         wander();
 
         // Only seek and eat grass if hungry
-        if (hunger >= hungerThreshold) {
+        if (health < 90 || hunger >= hungerThreshold) {
             targetGrass = findNearestGrass(g);
             if (targetGrass != null) {
                 moveTowards(targetGrass.pos, 0.2);

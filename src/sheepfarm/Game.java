@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Game extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 600;
+    public static final int WIDTH = 1600;
+    public static final int HEIGHT = 800;
 
     public List<GameObject> objects = new ArrayList<>();
     public ResourceLoader resources;
@@ -80,7 +80,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         }
 
         // --- Spawn grass patches, fully grown ---
-        BufferedImage[] grassFrames = resources.get("grass_right");
+        BufferedImage[] grassFrames = resources.get("grass");
         if (grassFrames != null && grassFrames.length > 0) {
             for (int i = 0; i < 20; i++) {
                 double x = Math.random() * WIDTH;
@@ -90,6 +90,22 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
                 objects.add(g);
             }
         }
+        
+        BufferedImage[] treeSprites = resources.get("tree");
+        if (treeSprites != null && treeSprites.length >= 4) {
+            BufferedImage[] stages = new BufferedImage[4];
+            System.arraycopy(treeSprites, 0, stages, 0, 4);
+
+            for (int i = 0; i < 5; i++) {
+                double x = Math.random() * Game.WIDTH;
+                double y = Math.random() * Game.HEIGHT;
+                objects.add(new Tree(x, y, 32, stages));
+
+            }
+        }
+
+
+        
     }
 
 

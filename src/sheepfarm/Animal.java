@@ -10,7 +10,7 @@ public abstract class Animal extends GameObject {
 	protected double damageTimer = 0;
 	
 	protected double hunger = 0;         // increments each tick
-	protected double hungerRate = 0.05;     // amount hunger increases per tick
+	protected double hungerRate = 0.01;     // amount hunger increases per tick
 	protected double hungerThreshold = 100; // when health starts declining
 	
 	
