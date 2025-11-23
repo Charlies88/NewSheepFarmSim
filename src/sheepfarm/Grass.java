@@ -18,6 +18,13 @@ public class Grass extends Plant {
 
     @Override
     public void render(Graphics2D g) {
-        g.drawImage(sprite, (int)pos.x - size, (int)pos.y - size, size * 2, size * 2, null);
+        // scale size by growth fraction (0–100)
+        double scale = growth / 100.0;
+        int drawSize = (int)(size * 2 * scale); // width/height of sprite
+        int drawX = (int)(pos.x - drawSize / 2);
+        int drawY = (int)(pos.y - drawSize / 2);
+
+        g.drawImage(sprite, drawX, drawY, drawSize, drawSize, null);
     }
+
 }
