@@ -177,10 +177,10 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         for (GameObject obj : objects) {
             double dx = obj.pos.x - e.getX();
             double dy = obj.pos.y - e.getY();
-            if (Math.sqrt(dx*dx + dy*dy) <= obj.size) {
+            if (obj.isPointInBase(e.getX(), e.getY())) {
                 selectedObject = obj;
-                break;
             }
+
         }
 
     }
@@ -202,10 +202,10 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             double dx = obj.pos.x - e.getX();
             double dy = obj.pos.y - e.getY();
             double distance = Math.sqrt(dx*dx + dy*dy);
-            if (distance <= obj.size) {
+            if (obj.isPointInBase(e.getX(), e.getY())) {
                 hoveredObject = obj;
-                break;
             }
+
         }
     }
 

@@ -19,7 +19,17 @@ public abstract class GameObject {
         this.health = maxHealth;
     }
     
+    /** Base interaction radius, defaults to size */
+    public double getBaseInteractionRadius() {
+        return size;
+    }
 
+    /** Check if a point (x,y) is within base interaction circle */
+    public boolean isPointInBase(double x, double y) {
+        double dx = x - pos.x;
+        double dy = y - pos.y;
+        return dx*dx + dy*dy <= getBaseInteractionRadius() * getBaseInteractionRadius();
+    }
 
     // Called every tick
     public void update(Game g) {
