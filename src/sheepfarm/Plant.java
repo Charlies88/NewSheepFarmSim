@@ -14,6 +14,10 @@ public abstract class Plant extends GameObject {
     protected double pushForce = 0.01;
 
     protected BufferedImage sprite;
+    
+    protected boolean eaten = false;
+
+
 
     public Plant(double x, double y, int size, int foodValue, BufferedImage sprite) {
         super(x, y, size, foodValue);
@@ -36,26 +40,24 @@ public abstract class Plant extends GameObject {
 
     @Override
     public boolean isPointInBase(double x, double y) {
-        double dx = pos.x - x;
-        double dy = pos.y - y; // pos.y is base
+        // base is at the bottom of the sprite
+        int drawSize = getCurrentSize() * 2;
+        double baseX = pos.x;
+        double baseY = pos.y + drawSize / 2; // move down to bottom
+        double dx = baseX - x;
+        double dy = baseY - y;
         double distance = Math.sqrt(dx*dx + dy*dy);
         return distance <= getBaseInteractionRadius();
     }
 
     @Override
     public void render(Graphics2D g) {
-        if (sprite == null) return;
+        if (sprite == null || isEaten()) return;
 
         int drawSize = getCurrentSize() * 2;
-        int drawX = (int)(pos.x - drawSize / 2);
-        int drawY = (int)(pos.y - drawSize); // base at pos.y
-        g.drawImage(sprite, drawX, drawY, drawSize, drawSize, null);
-
-        // Optional: draw base circle for debugging
-        // g.setColor(new Color(255, 0, 0, 100));
-        // g.fillOval((int)(pos.x - getBaseInteractionRadius()), (int)(pos.y - getBaseInteractionRadius()),
-        //            (int)(getBaseInteractionRadius()*2), (int)(getBaseInteractionRadius()*2));
+        g.drawImage(sprite, (int)(pos.x - drawSize/2), (int)(pos.y - drawSize/2), drawSize, drawSize, null);
     }
+
 
     public void push(double dx, double dy) {
         vel.add(new Vector(dx * pushForce, dy * pushForce));
@@ -80,4 +82,12 @@ public abstract class Plant extends GameObject {
     }
 
     public double getGrowth() { return growth; }
+    
+    public boolean isEaten() {
+        return eaten;
+    }
+
+    public void eat() {
+        this.eaten = true;
+    }
 }

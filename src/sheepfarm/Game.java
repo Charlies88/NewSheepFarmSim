@@ -111,9 +111,15 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     }
 
     private void update() {
-        for (GameObject obj : objects) obj.update(this);
+        for (GameObject obj : objects) {
+            obj.update(this);
+        }
 
+        // safely remove eaten plants
+        objects.removeIf(obj -> obj instanceof Plant && ((Plant)obj).isEaten());
     }
+
+
 
  
 
@@ -142,7 +148,13 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             StringBuilder sb = new StringBuilder();
             sb.append("Class: ").append(obj.getClass().getSimpleName()).append("\n");
             sb.append("X: ").append(String.format("%.1f", obj.pos.x)).append(" Y: ").append(String.format("%.1f", obj.pos.y)).append("\n");
-            if (obj instanceof Animal) sb.append("Health: ").append(((Animal)obj).health).append("\n");
+            if (obj instanceof Animal) {
+                Animal a = (Animal)obj;
+                sb.append("Health: ").append(a.health).append("\n");
+                sb.append("Hunger: ").append(String.format("%.1f", a.hunger)).append("\n");
+                sb.append("Hunger Threshold: ").append(a.hungerThreshold).append("\n");
+            }
+
             if (obj instanceof Plant) sb.append("Growth: ").append(((Plant)obj).getGrowth()).append("\n");
 
             String[] lines = sb.toString().split("\n");

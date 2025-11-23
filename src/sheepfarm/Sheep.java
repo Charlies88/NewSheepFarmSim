@@ -11,9 +11,9 @@ public class Sheep extends Animal {
                  BufferedImage[] walkRight,
                  BufferedImage[] walkLeft,
                  BufferedImage[] dead) {
-        super(x, y, size, walkRight[0], size); // pass default frame to Animal
+        super(x, y, size, walkRight[0], 100); // default health = 100
 
-        // Set animations in the parent
+        // Set animations
         setAnimation("walk_right", walkRight);
         setAnimation("walk_left", walkLeft);
         setAnimation("dead", dead);
@@ -21,7 +21,6 @@ public class Sheep extends Animal {
 
         playAnimation("idle");
 
-        // Initialize health
         health = 100;
         maxHealth = 100;
     }
@@ -30,12 +29,25 @@ public class Sheep extends Animal {
     protected void think(Game g) {
         if (!isAlive) return;
 
+        // Always move around or wander a bit
+        wander(); // implement a simple wandering behavior if needed
 
-        targetGrass = findNearestGrass(g);
-        if (targetGrass != null) moveTowards(targetGrass.pos, 0.2);
+        // Only seek and eat grass if hungry
+        if (hunger >= hungerThreshold) {
+            targetGrass = findNearestGrass(g);
+            if (targetGrass != null) {
+                moveTowards(targetGrass.pos, 0.2);
 
-        // Eat any nearby food
-        checkForFood(g);
+                double distance = distanceTo(targetGrass);
+                if (distance <= size + targetGrass.getBaseInteractionRadius()) {
+                    if (!targetGrass.isEaten()) {
+                        targetGrass.eat();
+                        eat(targetGrass.foodComponent.getFoodValue());
+                        hunger = 0; // reset hunger after eating
+                    }
+                }
+            }
+        }
 
         // Animation
         if (vel.x > 0.1) playAnimation("walk_right");
@@ -43,21 +55,30 @@ public class Sheep extends Animal {
         else playAnimation("idle");
     }
 
+    // Example simple wandering
+    private void wander() {
+        // small random velocity change
+        double dx = (Math.random() - 0.5) * 0.1;
+        double dy = (Math.random() - 0.5) * 0.1;
+        vel.add(new Vector(dx, dy));
+    }
+
 
     private Plant findNearestGrass(Game g) {
-        Plant best = null;
-        double bestDist = Double.MAX_VALUE;
+        Plant nearest = null;
+        double nearestDist = Double.MAX_VALUE;
         for (GameObject obj : g.objects) {
-            if (!(obj instanceof Plant)) continue;
-            Plant p = (Plant)obj;
-            if (p.foodComponent == null) continue; // skip if no food
-            double d = distanceTo(p);
-            if (d < bestDist) {
-                bestDist = d;
-                best = p;
+            if (obj instanceof Plant) {
+                Plant p = (Plant) obj;
+                if (p.foodComponent == null || p.isEaten()) continue;
+                double d = distanceTo(p);
+                if (d < nearestDist) {
+                    nearestDist = d;
+                    nearest = p;
+                }
             }
         }
-        return best;
+        return nearest;
     }
 
     private void moveTowards(Vector target, double speed) {

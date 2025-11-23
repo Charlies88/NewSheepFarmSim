@@ -62,9 +62,12 @@ public abstract class GameObject {
 
     public void takeDamage(double amount) {
         health -= amount;
-        if (health <= 0) die();
+        if (health <= 0) {
+            health = 0;
+            die();
+        }
     }
-    
+
 	 private void die() {
 			// TODO Auto-generated method stub
 			

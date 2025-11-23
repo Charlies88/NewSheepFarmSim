@@ -7,9 +7,10 @@ import java.util.Map;
 
 public abstract class Animal extends GameObject {
 
-
+	protected double damageTimer = 0;
+	
 	protected double hunger = 0;         // increments each tick
-	protected double hungerRate = 1;     // amount hunger increases per tick
+	protected double hungerRate = 0.05;     // amount hunger increases per tick
 	protected double hungerThreshold = 100; // when health starts declining
 	
 	
@@ -56,10 +57,19 @@ public abstract class Animal extends GameObject {
 
         // Hunger increases
         hunger += hungerRate;
-        if (hunger > hungerThreshold) takeDamage(1); // health decays if starving
+
+        if (hunger >= hungerThreshold) {
+            damageTimer += 1.0 / 60.0; // assume 60 FPS
+            if (damageTimer >= 1.0) { // 1 second interval
+                takeDamage(1);        // damage once per second
+                damageTimer = 0;
+            }
+        }
+
+        // Movement
         pos.add(vel);
 
-        // Animate
+        // Animation
         BufferedImage[] frames = animations.getOrDefault(currentAnim, animations.get("idle"));
         if (frames.length > 1) {
             frameTick++;
@@ -73,34 +83,40 @@ public abstract class Animal extends GameObject {
 
         applyFriction(0.95);
         resolveCollisions(g);
+
+        // Think after physics
         think(g);
     }
 
 
 
+
     protected void eat(int foodValue) {
         health = Math.min(health + foodValue, maxHealth);
-        hunger = Math.max(hunger - foodValue, 0); // eating reduces hunger
-        System.out.println(getClass().getSimpleName() + " ate and now has " + health + " health.");
+        hunger = 0; // fully reset after eating
     }
 
 
-
     public void checkForFood(Game g) {
-        if (!isAlive) return;
+        if (!isAlive || hunger < hungerThreshold) return; // ← only eat if starving
 
         for (GameObject obj : g.objects) {
-            if (obj.foodComponent != null && !obj.foodComponent.isConsumed() 
-                && this.distanceTo(obj) < size + obj.size) {
-                
-                // Only eat if health is not full
-                if (health < maxHealth) {
-                    int foodValue = obj.foodComponent.consume(); // returns int
-                    eat(foodValue);
+            if (obj instanceof Plant && obj.foodComponent != null && !((Plant)obj).isEaten()) {
+                Plant plant = (Plant)obj;
+                double dx = plant.pos.x - pos.x;
+                double dy = plant.pos.y - pos.y;
+                double distance = Math.sqrt(dx*dx + dy*dy);
+
+                if (distance <= size + plant.getBaseInteractionRadius()) {
+                    plant.eat();
+                    eat(plant.foodComponent.getFoodValue());
+                    return; // stop after first bite
                 }
             }
         }
     }
+
+
 
 
 

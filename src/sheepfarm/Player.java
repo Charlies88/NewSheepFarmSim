@@ -20,6 +20,12 @@ public class Player extends Animal {
         playAnimation("idle");
     }
 
+    @Override
+    public void update(Game g) {
+        super.update(g); // calls Animal.update(), which handles health decay
+    }
+
+    
 
     // Determine which frame to show based on movement direction
     BufferedImage getFrameFromDirection(double dx, double dy) {
@@ -52,10 +58,7 @@ public class Player extends Animal {
 
         // Select animation frame based on direction
         currentFrame = getFrameFromDirection(dx, dy);
-        
-     
-        // Eat any nearby food
-        checkForFood(g);
+    
 
         
     }
