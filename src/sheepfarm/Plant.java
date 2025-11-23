@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 public abstract class Plant extends GameObject {
     protected Vector homePos;
     protected double growth = 0;
+    private double maxGrowth = 100;    // fully grown size
     protected double growthRate = 0.05;
 
     // physics
@@ -25,13 +26,23 @@ public abstract class Plant extends GameObject {
         homePos = pos.copy();
 
         if (foodValue > 0) {
-            this.foodComponent = new FoodComponent(foodValue);
+        	foodComponent = new FoodComponent((int)(foodValue * (size / 20.0)));
+
         }
     }
 
     public int getCurrentSize() {
         return Math.max(1, (int)(size * (growth / 100.0)));
     }
+    
+    public int getFoodValue() {
+        if (foodComponent == null) return 0;
+
+        // scale food value by growth (0.0–1.0) or size
+        double scale = getGrowth() / getMaxGrowth(); // assuming getGrowth() returns current growth
+        return (int)(foodComponent.getFoodValue() * scale);
+    }
+
 
     @Override
     public double getBaseInteractionRadius() {
@@ -82,6 +93,10 @@ public abstract class Plant extends GameObject {
     }
 
     public double getGrowth() { return growth; }
+    
+    public double getMaxGrowth() {
+        return maxGrowth;
+    }
     
     public boolean isEaten() {
         return eaten;

@@ -5,7 +5,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 public class Player extends Animal {
-    private int speed = 4;
+    private int speed = 2;
 
     // Input flags
     private boolean up, down, left, right;

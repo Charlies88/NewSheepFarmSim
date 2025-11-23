@@ -136,7 +136,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         // Highlight selected object
         if (selectedObject != null) {
             g.setColor(new Color(255, 255, 0, 128));
-            int radius = selectedObject.size;
+            int radius = (selectedObject instanceof Player) ? 32 : selectedObject.size;
             g.fillOval((int)(selectedObject.pos.x - radius), (int)(selectedObject.pos.y - radius),
                        radius * 2, radius * 2);
         }
@@ -155,7 +155,13 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
                 sb.append("Hunger Threshold: ").append(a.hungerThreshold).append("\n");
             }
 
-            if (obj instanceof Plant) sb.append("Growth: ").append(((Plant)obj).getGrowth()).append("\n");
+            if (obj instanceof Plant) {
+                Plant p = (Plant) obj;
+                sb.append("Growth: ").append(String.format("%.1f", p.getGrowth())).append("/").append(p.getMaxGrowth()).append("\n");
+                sb.append("Food Value: ").append(p.getFoodValue()).append("\n");
+            }
+
+
 
             String[] lines = sb.toString().split("\n");
             int boxWidth = 0;

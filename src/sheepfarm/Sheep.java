@@ -5,6 +5,9 @@ import java.awt.image.BufferedImage;
 
 public class Sheep extends Animal {
 
+	private double wanderDir = Math.random() * 2 * Math.PI; // persistent direction
+	private int wanderTimer = 0;
+
     private Plant targetGrass = null;
 
     public Sheep(double x, double y, int size,
@@ -55,12 +58,18 @@ public class Sheep extends Animal {
         else playAnimation("idle");
     }
 
-    // Example simple wandering
     private void wander() {
-        // small random velocity change
-        double dx = (Math.random() - 0.5) * 0.1;
-        double dy = (Math.random() - 0.5) * 0.1;
-        vel.add(new Vector(dx, dy));
+        // Occasionally change direction
+        wanderTimer--;
+        if (wanderTimer <= 0) {
+            wanderDir += (Math.random() - 1) * Math.PI / 4; // small random turn
+            wanderTimer = 20 + (int)(Math.random() * 60); // next change in 1-3 seconds
+        }
+
+        // Move in current direction
+        double speed = 0.5; // adjust speed
+        vel.x = Math.cos(wanderDir) * speed;
+        vel.y = Math.sin(wanderDir) * speed;
     }
 
 
