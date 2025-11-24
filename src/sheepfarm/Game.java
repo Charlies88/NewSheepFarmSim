@@ -16,6 +16,9 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     public ResourceLoader resources;
     public Player player;
 
+    public List<GameObject> toAdd = new ArrayList<>();
+    public List<GameObject> toRemove = new ArrayList<>();
+    
     private Thread gameThread;
     private boolean running = false;
     
@@ -24,7 +27,8 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     
     private int grassSpawnCooldown = 0; // ticks until next spawn
     private int grassSpawnRate = 2000;   // spawn a grass every 300 ticks (~5 seconds at 60FPS)
-
+    private int treeSpawnCooldown = 0;
+    private int treeSpawnRate = 3000;  // ticks (adjust as desired)
 
 
     public Game() {
@@ -60,7 +64,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         if (playerSprites != null) {
         	player = new Player(WIDTH / 2.0, HEIGHT / 2.0, 64, playerSprites, 100);
 
-            objects.add(player);
+        	addObject(player);
         } else {
             System.err.println("Failed to load player!");
         }
@@ -75,7 +79,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
                 double x = Math.random() * WIDTH;
                 double y = Math.random() * HEIGHT;
                 Sheep sheep = new Sheep(x, y, 32, sheepRight, sheepLeft, sheepDead);
-                objects.add(sheep);
+                addObject(sheep);
             }
         }
 
@@ -87,7 +91,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
                 double y = Math.random() * HEIGHT;
                 Grass g = new Grass(x, y, 20, grassFrames[0]);
                 g.setGrowth(g.getMaxGrowth()); // ensure fully grown
-                objects.add(g);
+                addObject(g);
             }
         }
         
@@ -103,7 +107,8 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
                 double x = Math.random() * Game.WIDTH;
                 double y = Math.random() * Game.HEIGHT;
                 Tree t = new Tree(x, y, 32, stages, treeFood);
-                objects.add(t);
+                t.setGrowth(t.getMaxGrowth()); // fully grown
+                addObject(t);
             }
         }
 
@@ -140,11 +145,12 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     }
 
     private void update() {
+        // --- Update all objects ---
         for (GameObject obj : objects) {
-            obj.update(this);
+            obj.update(this);  // objects can now safely queue additions/removals
         }
 
-     // Random grass spawning
+        // --- Random grass spawning ---
         if (grassSpawnCooldown <= 0) {
             spawnRandomGrass();
             grassSpawnCooldown = grassSpawnRate;
@@ -152,9 +158,26 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             grassSpawnCooldown--;
         }
 
-        
-        // safely remove eaten plants
-        objects.removeIf(obj -> obj instanceof Plant && ((Plant)obj).isEaten());
+        // --- Random tree spawning ---
+        if (treeSpawnCooldown <= 0) {
+            spawnRandomTree();
+            treeSpawnCooldown = treeSpawnRate;
+        } else {
+            treeSpawnCooldown--;
+        }
+
+        // --- Queue eaten plants for removal ---
+        for (GameObject obj : objects) {
+            if (obj instanceof Plant && ((Plant) obj).isEaten()) {
+                removeObject(obj);
+            }
+        }
+
+        // --- Apply queued additions/removals ---
+        objects.addAll(toAdd);
+        objects.removeAll(toRemove);
+        toAdd.clear();
+        toRemove.clear();
     }
 
 
@@ -167,7 +190,14 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         }
     }
 
- 
+    public void addObject(GameObject obj) {
+        toAdd.add(obj);
+    }
+
+    public void removeObject(GameObject obj) {
+        toRemove.add(obj);
+    }
+
 
     @Override
     protected void paintComponent(Graphics g0) {
@@ -231,11 +261,23 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         if (grassFrames != null && grassFrames.length > 0) {
             double x = Math.random() * WIDTH;
             double y = Math.random() * HEIGHT;
-            objects.add(new Grass(x, y, 20, grassFrames[0]));
+            addObject(new Grass(x, y, 20, grassFrames[0]));
         }
     }
 
-    
+ // --- Random tree spawning (reuse grass logic) ---
+    private void spawnRandomTree() {
+        BufferedImage[] treeSprites = resources.get("tree");
+        if (treeSprites != null && treeSprites.length >= 4) {
+            BufferedImage[] stages = new BufferedImage[4];
+            System.arraycopy(treeSprites, 0, stages, 0, 4);
+
+            double x = Math.random() * WIDTH;
+            double y = Math.random() * HEIGHT;
+            Tree t = new Tree(x, y, 32, stages, 50); // assign food value
+            addObject(t);
+        }
+    }
 
     // ---------------- KeyListener ----------------
     @Override public void keyTyped(KeyEvent e) {}

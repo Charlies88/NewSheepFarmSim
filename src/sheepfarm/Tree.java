@@ -69,6 +69,17 @@ public class Tree extends Plant {
     }
 
     @Override
+    public int getFoodValue() {
+        // Only stage 0 (sprout) provides food
+        if (currentStage == 0 && foodComponent != null) {
+            double scale = getGrowth() / getMaxGrowth();
+            return (int)(foodComponent.getFoodValue() * scale);
+        }
+        return 0;
+    }
+
+    
+    @Override
     public void render(Graphics2D g) {
         if (sprite == null) return;
         int drawSize = size * 2;
@@ -77,7 +88,7 @@ public class Tree extends Plant {
 
     @Override
     public double getBaseInteractionRadius() {
-        return size * 2;
+        return size * 1;
     }
 
     @Override
