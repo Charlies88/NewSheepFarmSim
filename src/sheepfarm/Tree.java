@@ -11,6 +11,11 @@ public class Tree extends Plant {
     public Tree(double x, double y, int size, BufferedImage[] stages, int foodValue) {
         super(x, y, size, foodValue, stages[0]); // give base stage a food value
         this.stages = stages;
+        this.rigidRoot = true;
+        this.springStrength = 0.5; // we use rigidRoot pull, not normal spring
+        this.dampening = 0.5;      // light wiggle
+        this.pushForce = 0.2;      // trees barely push
+
         if (foodValue > 0) {
             foodComponent = new FoodComponent(foodValue);
         }
@@ -54,12 +59,9 @@ public class Tree extends Plant {
                     break;
             }
         }
+        // --- This is the key: call Plant.update to handle rooting and velocity ---
+        super.update(g);
 
-        // Tree is fully rooted: ignore velocity/position updates
-        vel.x = 0;
-        vel.y = 0;
-        pos.x = homePos.x;
-        pos.y = homePos.y;
     }
 
 

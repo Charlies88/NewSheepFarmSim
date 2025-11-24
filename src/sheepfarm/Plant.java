@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 
 public abstract class Plant extends GameObject {
     protected Vector homePos;
+    
     protected double growth = 0;
     private double maxGrowth = 100;    // fully grown size
     protected double growthRate = 0.005; // growth per update tick
@@ -13,12 +14,10 @@ public abstract class Plant extends GameObject {
     protected double springStrength = 0.01;
     protected double dampening = 0.1;
     protected double pushForce = 0.01;
+    protected boolean eaten = false;
+    protected boolean rigidRoot = false;
 
     protected BufferedImage sprite;
-    
-    protected boolean eaten = false;
-
-
 
     public Plant(double x, double y, int size, int foodValue, BufferedImage sprite) {
         super(x, y, size, foodValue);
@@ -76,17 +75,29 @@ public abstract class Plant extends GameObject {
 
     @Override
     public void update(Game g) {
+        // Grow
         grow();
 
-        // gently move back to home
-        Vector toHome = homePos.copy().subtract(pos).multiply(springStrength);
-        vel.add(toHome);
+        if (rigidRoot) {
+            // Fully rooted: ignore velocity, keep position fixed
+            vel.x = 0;
+            vel.y = 0;
+            pos.x = homePos.x;
+            pos.y = homePos.y;
+        } else {
+            // Gentle spring-back to home position
+            Vector toHome = homePos.copy().subtract(pos).multiply(springStrength);
+            vel.add(toHome);
 
-        // apply friction/dampening
-        vel.multiply(dampening);
+            // Apply friction/dampening
+            vel.multiply(dampening);
 
-        super.update(g);
+            // Update position
+            super.update(g);
+        }
     }
+
+
 
     protected void grow() {
         growth = Utils.clamp(growth + growthRate, 0, 100);
